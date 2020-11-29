@@ -80,9 +80,15 @@ app
         let paths = storage.paths({path: path})
         if (paths.length === 1) {
           let doc = storage.getDocument(path)
-          // TODO: use timestamp to set time, author to set user ownership?
-          // TODO: If has special characters, convert to posix permissions
-          return cb(null, stat({ mode: 'file', size: doc.content.length }))
+          let time = new Date(doc.timestamp / 1000)
+          // TODO: use author to set user ownership?
+          // TODO: If has special characters, convert to posix permissions?
+          return cb(null, stat({
+            mode: 'file',
+            size: doc.content.length,
+            ctime: time,
+            mtime: time,
+          }))
         }
         // Test if directory
         paths = storage.paths({pathPrefix: path})
@@ -101,11 +107,27 @@ app
       },
       read: function (path, fd, buf, len, pos, cb) {
         let str = storage.getContent(path).slice(pos, pos + len)
-        console.log("read", {path, fd, len, pos, str})
         if (!str) return cb(0)
         buf.write(str)
         return cb(str.length)
       },
+      unlink: function (path, cb) {
+        // Write an empty document
+        let doc = { format: 'es.4', path: path, content: '' }
+        let result = storage.set(keypair, doc)
+        cb(0)
+      },
+      write: function (path, fd, buffer, length, position, cb) {
+        let doc = storage.getContent(path)
+        let buf = Buffer.alloc(Math.max(position+length, doc.length))
+        buf.write(doc)
+        buffer.copy(buf, position, 0, length)
+        storage.set(keypair, { format: 'es.4', path: path, content: buf.toString() })
+        cb(0, length)
+      },
+      flush: function (path, fd, cb) {
+        cb(0)
+      }
     }
 
 
@@ -115,8 +137,8 @@ app
         console.error(`ERROR: ${err}`)
         exit(1)
       }
+      console.log("ready")
     })
-
   })
 
 app.parse(process.argv)
