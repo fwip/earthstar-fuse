@@ -1,0 +1,27 @@
+{
+  "name": "earthstar-fuse",
+  "version": "1.0.0-alpha1",
+  "description": "A command-line utility to expose an Earthstar workspace as a FUSE filesystem",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "tap"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/fwip/earthstar-fuse"
+  },
+  "keywords": [
+    "fuse",
+    "earthstar"
+  ],
+  "author": "Jemma Nelson <jemma.s.nelson@gmail.com>",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "commander": "^6.2.0",
+    "earthstar": "^5.7.4",
+    "fuse-native": "^2.2.6"
+  },
+  "devDependencies": {
+    "tap": "^14.11.0"
+  }
+}
